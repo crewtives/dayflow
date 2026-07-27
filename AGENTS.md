@@ -34,6 +34,8 @@ src/ports/           contratos de infraestructura
 src/infrastructure/  adaptadores de navegador y persistencia
 src/store/           estado de dominio e hidratación
 src/shared/          primitivas genéricas reutilizables
+docs/solutions/      aprendizajes y soluciones documentadas por categoría, buscables por frontmatter (`module`, `tags`, `problem_type`)
+CONCEPTS.md           vocabulario compartido del dominio y sus distinciones
 ```
 
 - Importa una funcionalidad desde `@/features/<feature>`, nunca desde sus carpetas internas. ESLint lo impone.
@@ -42,6 +44,7 @@ src/shared/          primitivas genéricas reutilizables
 - El estado persistente y compartido pertenece a `src/store/`; estado efímero de UI (drawer, borrador, foco, hover o feedback) permanece en el componente o funcionalidad.
 - Crea adaptadores en `src/infrastructure/` contra un contrato de `src/ports/`; no llames directamente a `localStorage` desde una funcionalidad nueva.
 - Consulta [docs/architecture/feature-protocol.md](docs/architecture/feature-protocol.md) para la composición de funcionalidades complejas.
+- `docs/solutions/` resulta relevante al implementar, depurar o decidir en áreas ya documentadas; `CONCEPTS.md` orienta las conversaciones y cambios sobre el dominio.
 
 ## Patrones importantes
 
