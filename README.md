@@ -6,6 +6,8 @@ Dayflow es un MVP web para profesionales independientes y estudiantes que quiere
 
 Este repositorio contiene la versión funcional del prototipo: una aplicación Next.js en español, con datos locales del navegador y sin servicios externos.
 
+La definición ejecutable del mock original se conserva agrupada en [`mock/`](mock/) como referencia visual y de comportamiento.
+
 ## La idea
 
 Una lista de tareas no responde por sí sola a las preguntas que realmente importan al comenzar el día: «¿qué debo hacer primero?», «¿cuándo cabe?» y «¿tengo energía para ello?». Dayflow reúne esas decisiones en un único flujo:
