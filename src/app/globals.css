@@ -39,11 +39,24 @@ html {
 body {
   min-width: 320px;
   margin: 0;
+  overflow-x: hidden;
   color: var(--color-sumi);
   background:
     linear-gradient(105deg, transparent 0 48%, rgba(26, 26, 26, 0.025) 48.2% 48.4%, transparent 48.6%),
     var(--color-paper);
   font-family: var(--font-sans);
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 :focus-visible {

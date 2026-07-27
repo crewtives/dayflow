@@ -1,0 +1,5 @@
+import { expect, test } from "@playwright/test";
+
+test("today and week use the Dayflow shell", async ({ page }) => { await page.goto("/today"); await expect(page.getByRole("heading", { name: "Agenda del día" })).toBeVisible(); await expect(page.getByRole("link", { name: "Hoy" })).toHaveAttribute("aria-current", "page"); await page.goto("/week"); await expect(page.getByRole("heading", { name: "La forma de tu semana" })).toBeVisible(); await expect(page.getByRole("link", { name: "Semana" })).toHaveAttribute("aria-current", "page"); });
+
+test("mobile today has no horizontal overflow and the drawer restores focus", async ({ page }) => { await page.setViewportSize({ width: 393, height: 852 }); await page.goto("/today"); expect(await page.locator("html").evaluate((node) => node.scrollWidth <= window.innerWidth)).toBeTruthy(); const trigger = page.getByRole("button", { name: "Nueva tarea" }).last(); await trigger.focus(); await trigger.click(); await expect(page.getByRole("dialog")).toBeVisible(); await page.keyboard.press("Escape"); await expect(page.getByRole("dialog")).toHaveCount(0); await expect(trigger).toBeFocused(); });

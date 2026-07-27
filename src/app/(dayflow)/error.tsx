@@ -1,0 +1,2 @@
+"use client";
+export default function Error({ reset }: { error: Error; reset: () => void }) { return <main className="grid min-h-screen place-items-center bg-paper p-6 text-sumi"><section className="max-w-md border border-paper-mid bg-paper-bright p-6"><p className="font-label text-xs text-vermilion-deep">PLIEGUE INTERRUMPIDO</p><h1 className="mt-2 text-2xl">No pudimos abrir esta jornada.</h1><button className="mt-5 border border-vermilion-deep px-4 py-3 text-vermilion-deep" onClick={reset}>Intentar de nuevo</button></section></main>; }
