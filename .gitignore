@@ -1,0 +1,15 @@
+# Dependencies and framework output
+node_modules/
+.next/
+out/
+
+# Test output
+coverage/
+playwright-report/
+test-results/
+
+# TypeScript incremental metadata
+*.tsbuildinfo
+
+# Local environment files
+.env*.local

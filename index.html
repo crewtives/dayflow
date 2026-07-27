@@ -1,0 +1,121 @@
+<!--
+THESIS: Una jornada es una hoja que toma forma al decidir cuándo actuar y qué merece foco.
+OWN-WORLD: Papel blanco de pliegue, campos de washi vermellón, tinta sumi y un punto dorado activo.
+-->
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#d83c2e" />
+    <meta name="description" content="Dayflow: planifica tu jornada, decide qué merece foco y revisa tu energía semanal." />
+    <title>Dayflow — Tu día toma forma</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Saltar al contenido</a>
+    <div class="app-shell" id="app">
+      <aside class="side-sheet" aria-label="Navegación y estado del día">
+        <div class="brand"><span class="brand-mark" aria-hidden="true"><span></span><span></span></span><span>DAYFLOW</span></div>
+        <nav class="primary-nav" aria-label="Vistas principales">
+          <button class="nav-item is-active" data-view="today" aria-current="page" type="button"><span class="nav-glyph" aria-hidden="true">□</span>Hoy</button>
+          <button class="nav-item" data-view="week" type="button"><span class="nav-glyph" aria-hidden="true">◇</span>Semana</button>
+        </nav>
+        <section class="energy-panel" aria-labelledby="energy-title">
+          <div class="section-rule"><h2 id="energy-title">ENERGÍA DEL DÍA</h2><span data-energy-status>Sin registrar</span></div>
+          <p class="energy-question">¿Cómo estuvo tu energía?</p>
+          <div class="energy-scale" data-energy-scale role="radiogroup" aria-label="Nivel de energía">
+            <button type="button" role="radio" aria-checked="false" data-energy="1"><span>1</span><small>Muy baja</small></button>
+            <button type="button" role="radio" aria-checked="false" data-energy="2"><span>2</span><small>Baja</small></button>
+            <button type="button" role="radio" aria-checked="false" data-energy="3"><span>3</span><small>Media</small></button>
+            <button type="button" role="radio" aria-checked="false" data-energy="4"><span>4</span><small>Alta</small></button>
+            <button type="button" role="radio" aria-checked="false" data-energy="5"><span>5</span><small>Muy alta</small></button>
+          </div>
+        </section>
+        <p class="mock-note">Datos locales de demostración</p>
+      </aside>
+
+      <div class="workspace">
+        <header class="top-sheet">
+          <div><p class="date-kicker" id="date-kicker">JORNADA</p><h1 id="day-heading">Hoy</h1></div>
+          <div class="date-controls" aria-label="Cambiar de día">
+            <button class="icon-button" id="previous-day" type="button" aria-label="Día anterior">←</button>
+            <button class="today-button" id="go-today" type="button">Hoy</button>
+            <button class="icon-button" id="next-day" type="button" aria-label="Día siguiente">→</button>
+          </div>
+          <div class="header-actions"><button class="primary-button" id="new-task-button" type="button"><span aria-hidden="true">＋</span> Nueva tarea</button></div>
+        </header>
+
+        <main id="main-content" tabindex="-1">
+          <section id="today-view" class="view is-visible" aria-labelledby="day-heading">
+            <div class="onboarding-fold" id="onboarding-fold" hidden>
+              <div><p class="fold-step">PRIMER PLIEGUE</p><h2>Convierte pendientes en un día posible.</h2><p>Crea un evento, colócalo en el tiempo y llévalo a foco cuando estés listo.</p></div>
+              <button class="paper-button" id="dismiss-onboarding" type="button">Entendido</button>
+            </div>
+            <section class="mobile-energy-panel" aria-labelledby="mobile-energy-title">
+              <div class="section-rule"><h2 id="mobile-energy-title">ENERGÍA DEL DÍA</h2><span data-energy-status>Sin registrar</span></div>
+              <div class="energy-scale" data-energy-scale role="radiogroup" aria-label="Nivel de energía de hoy">
+                <button type="button" role="radio" aria-checked="false" data-energy="1"><span>1</span><small>Muy baja</small></button>
+                <button type="button" role="radio" aria-checked="false" data-energy="2"><span>2</span><small>Baja</small></button>
+                <button type="button" role="radio" aria-checked="false" data-energy="3"><span>3</span><small>Media</small></button>
+                <button type="button" role="radio" aria-checked="false" data-energy="4"><span>4</span><small>Alta</small></button>
+                <button type="button" role="radio" aria-checked="false" data-energy="5"><span>5</span><small>Muy alta</small></button>
+              </div>
+            </section>
+            <div class="day-grid">
+              <section class="agenda-sheet" aria-labelledby="agenda-title">
+                <div class="panel-heading"><div><p class="fold-step">HOJA / <span id="selected-date-short"></span></p><h2 id="agenda-title">Agenda del día</h2></div></div>
+                <div id="agenda" class="timeline" aria-live="polite"></div>
+              </section>
+              <aside class="tasks-sheet" aria-labelledby="tasks-title">
+                <div class="panel-heading task-heading"><div><p class="fold-step">ESTADO</p><h2 id="tasks-title">Tareas</h2></div></div>
+                <div class="mobile-status-tabs" role="tablist" aria-label="Mostrar estado de tareas">
+                  <button type="button" role="tab" data-status-tab="focus" aria-selected="true">En foco <span>0</span></button>
+                  <button type="button" role="tab" data-status-tab="pending" aria-selected="false">Pendiente <span>0</span></button>
+                  <button type="button" role="tab" data-status-tab="done" aria-selected="false">Hecho <span>0</span></button>
+                </div>
+                <div id="task-columns" class="status-stack"></div>
+              </aside>
+            </div>
+          </section>
+
+          <section id="week-view" class="view week-sheet" aria-labelledby="week-title" hidden>
+            <header class="week-header"><div><p class="fold-step">ÚLTIMOS SIETE DÍAS</p><h2 id="week-title">La forma de tu semana</h2><p>Compara energía y tareas terminadas. Sin juicios, solo una señal para planificar mejor.</p></div></header>
+            <div id="week-chart" class="week-chart" aria-live="polite"></div>
+            <div id="week-empty" class="empty-fold" hidden><h3>Aún no hay energía registrada</h3><p>Registra cómo llegas a tu día para empezar a ver el patrón semanal.</p><button class="paper-button" type="button" data-return-today>Volver a hoy</button></div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <nav class="mobile-nav" aria-label="Navegación móvil">
+      <button class="is-active" type="button" data-view="today"><span aria-hidden="true">□</span>Hoy</button>
+      <button type="button" data-view="week"><span aria-hidden="true">◇</span>Semana</button>
+      <button class="mobile-create" id="mobile-new-task" type="button"><span aria-hidden="true">＋</span>Nueva</button>
+    </nav>
+
+    <div id="drawer-backdrop" class="drawer-backdrop" hidden></div>
+    <aside id="task-drawer" class="task-drawer" role="dialog" aria-modal="true" aria-labelledby="drawer-title" aria-hidden="true">
+      <div class="drawer-header"><div><p class="fold-step" id="drawer-step">NUEVO EVENTO</p><h2 id="drawer-title">Nuevo evento</h2></div><button class="icon-button" id="close-drawer" type="button" aria-label="Cerrar formulario">×</button></div>
+      <form id="task-form" novalidate>
+        <input type="hidden" id="task-id" />
+        <div class="field"><label for="task-title">Título</label><input id="task-title" name="title" type="text" maxlength="90" autocomplete="off" /><p class="field-error" id="title-error" hidden>Escribe un título para poder guardar el evento.</p></div>
+        <fieldset class="time-fields"><legend>Cuándo</legend>
+          <div class="field-grid">
+            <div class="field"><label for="task-date">Día</label><input id="task-date" name="date" type="date" /></div>
+            <div class="field"><label for="task-start">Empieza</label><input id="task-start" name="start" type="time" step="60" /></div>
+            <div class="field"><label for="task-end">Termina</label><input id="task-end" name="end" type="time" step="60" /></div>
+          </div>
+          <div class="field"><label for="task-recurrence">Se repite</label><select id="task-recurrence" name="recurrence"><option value="none">No se repite</option><option value="daily">Cada día</option><option value="weekdays">Días laborables</option><option value="weekly">Cada semana</option></select></div>
+          <p class="field-note">Arrastra entre bloques de 30 min. Para una hora exacta, edítala aquí.</p>
+          <p class="field-error" id="time-error" hidden>Indica una hora de inicio y una hora de fin posterior.</p>
+        </fieldset>
+        <div class="field"><label for="task-status">Estado</label><select id="task-status" name="status"><option value="pending">Pendiente</option><option value="focus">En foco</option><option value="done">Hecho</option></select></div>
+        <div class="drawer-actions"><button class="danger-button" id="delete-task" type="button" hidden>Eliminar</button><button class="primary-button" type="submit">Guardar evento</button></div>
+      </form>
+    </aside>
+    <div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="true"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>

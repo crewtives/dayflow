@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@theme {
+  --color-vermilion: #d83c2e;
+  --color-vermilion-deep: #a9271e;
+  --color-vermilion-wash: #e07a6e;
+  --color-paper: #f7f3ee;
+  --color-paper-bright: #fffdf9;
+  --color-paper-grey: #e6e2da;
+  --color-paper-mid: #d4cec4;
+  --color-sumi: #1a1a1a;
+  --color-sumi-soft: #57524d;
+  --color-gold: #d4af37;
+  --color-error: #8e1d18;
+  --color-focus-ring: #111111;
+  --font-sans: "Avenir Next", Avenir, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-label: "Avenir Next Condensed", "Arial Narrow", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Avenir Next", Avenir, ui-sans-serif, system-ui, sans-serif;
+  --shadow-fold: 6px 8px 18px rgba(26, 26, 26, 0.14);
+  --ease-fold: 280ms cubic-bezier(0.22, 1, 0.36, 1);
+  --radius-fold: 2px;
+  --radius-control: 4px;
+  --radius-action: 3px;
+  --spacing-sidebar: 244px;
+}
+
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  background: var(--color-paper);
+}
+
+body {
+  min-width: 320px;
+  margin: 0;
+  color: var(--color-sumi);
+  background:
+    linear-gradient(105deg, transparent 0 48%, rgba(26, 26, 26, 0.025) 48.2% 48.4%, transparent 48.6%),
+    var(--color-paper);
+  font-family: var(--font-sans);
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-focus-ring);
+  outline-offset: 3px;
+}
