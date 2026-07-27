@@ -13,3 +13,7 @@ test-results/
 
 # Local environment files
 .env*.local
+
+# Local Impeccable design-session artifacts
+.impeccable/
+.impeccable-*-question.json

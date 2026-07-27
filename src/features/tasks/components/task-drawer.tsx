@@ -1,3 +1,26 @@
 "use client";
-import { Button, Dialog } from "@/shared/ui";
-export function TaskDrawer({ open, onClose }: { open: boolean; onClose: () => void }) { return <Dialog onClose={onClose} open={open} titleId="drawer-title"><header className="flex items-start justify-between border-b border-paper-mid pb-5"><div><p className="font-label text-xs tracking-[.14em] text-vermilion-deep">NUEVO EVENTO</p><h2 className="mt-1 text-3xl tracking-tight" id="drawer-title">Nuevo evento</h2></div><Button aria-label="Cerrar formulario" onClick={onClose} tone="quiet">×</Button></header><form className="grid gap-5 pt-7" onSubmit={(event) => event.preventDefault()}><label className="grid gap-2 text-sm font-semibold">Título<input autoComplete="off" className="min-h-12 border border-sumi-soft bg-paper-bright px-3 font-normal" maxLength={90} /></label><fieldset className="grid gap-3"><legend className="mb-2 text-sm font-semibold">Cuándo</legend><div className="grid grid-cols-2 gap-3"><label className="grid gap-2 text-sm">Día<input className="min-h-12 border border-sumi-soft bg-paper-bright px-3" type="date" /></label><label className="grid gap-2 text-sm">Empieza<input className="min-h-12 border border-sumi-soft bg-paper-bright px-3" type="time" /></label><label className="grid gap-2 text-sm">Termina<input className="min-h-12 border border-sumi-soft bg-paper-bright px-3" type="time" /></label></div></fieldset><label className="grid gap-2 text-sm font-semibold">Estado<select className="min-h-12 border border-sumi-soft bg-paper-bright px-3 font-normal" defaultValue="pending"><option value="pending">Pendiente</option><option value="focus">En foco</option><option value="done">Hecho</option></select></label><div className="flex justify-end border-t border-paper-mid pt-5"><Button type="submit">Guardar evento</Button></div></form></Dialog>; }
+
+import { useCallback, useState, type FormEvent } from "react";
+
+import type { CalendarDate, Task } from "@/domain/dayflow";
+import { Dialog } from "@/shared/ui";
+
+import { useTaskActions } from "../hooks/use-task-actions";
+import { useTaskDraft } from "../hooks/use-task-draft";
+import { TaskDrawerForm } from "./task-drawer/task-drawer-form";
+import { TaskDrawerHeader } from "./task-drawer/task-drawer-header";
+
+export function TaskDrawer({ open, onClose, date, task, returnFocusTo, onFeedback }: { open: boolean; onClose: () => void; date: CalendarDate; task?: Task; returnFocusTo?: HTMLElement | null; onFeedback?: (message: string) => void }) {
+  const { draft, setDraft, reset } = useTaskDraft(date, task);
+  const { create, command } = useTaskActions();
+  const [error, setError] = useState("");
+  const close = useCallback(() => { reset(date); setError(""); onClose(); }, [date, onClose, reset]);
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const result = task ? await command({ type: "edit", id: task.id, changes: draft }) : await create(draft);
+    if (!result.ok) { setError(result.message); return; }
+    onFeedback?.(task ? "Evento actualizado." : "Evento creado.");
+    close();
+  };
+  return <Dialog onClose={close} open={open} returnFocusTo={returnFocusTo} titleId="drawer-title"><TaskDrawerHeader isEditing={Boolean(task)} onClose={close} /><TaskDrawerForm draft={draft} error={error} onDraftChange={(changes) => setDraft({ ...draft, ...changes })} onSubmit={submit} /></Dialog>;
+}

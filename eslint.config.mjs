@@ -16,6 +16,11 @@ export default defineConfig([
               message:
                 "Feature internals are private. Import from a feature's public entry point instead.",
             },
+            {
+              group: ["../../*/components/*", "../../../*/components/*"],
+              message:
+                "Feature internals are private. Import from a feature's public entry point instead.",
+            },
           ],
         },
       ],

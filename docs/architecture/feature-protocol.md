@@ -17,3 +17,9 @@ Dependencies point from app to features, features to domain/shared, and infrastr
 ## State and testing
 
 Use global state only for identity-scoped domain data and cross-feature actions. Keep drawers, drafts, focus, hover, drag, and temporary feedback in component state. Every feature-bearing change includes the lowest useful automated test; add browser coverage when a behavior crosses routing, persistence, or browser input.
+
+## Feature component composition
+
+Complex feature roots keep orchestration in their exported component and compose private, named regions below it. Group those regions under `src/features/<feature>/components/<root-name>/`; use explicit props and `children` slots for the current shallow trees.
+
+Keep hooks, effects, persistence, focus, feedback, and cross-region callbacks at the feature root. A region may own only interaction state that is not observable outside that region. Do not expose a private region from `index.ts`, import another feature's internals, or add Context solely to avoid a small prop chain. Introduce a feature-local Context only after a feature has a demonstrated deep shared UI contract.

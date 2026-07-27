@@ -1,9 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback } from "react";
+
+import type { CalendarDate, EnergyValue } from "@/domain/dayflow";
+import { selectEnergyByDate } from "@/store/dayflow-selectors";
+import { useDayflowStore } from "@/store/dayflow-provider";
+import { EnergyOption } from "./energy-scale/energy-option";
+
 const labels = ["Muy baja", "Baja", "Media", "Alta", "Muy alta"];
-export function EnergyScale({ compact = false }: { compact?: boolean }) {
-  const [value, setValue] = useState<number>();
+export function EnergyScale({ compact = false, date, onFeedback }: { compact?: boolean; date: CalendarDate; onFeedback?: (message: string) => void }) {
+  const energyByDate = useDayflowStore(selectEnergyByDate);
+  const update = useDayflowStore((state) => state.update);
+  const value = energyByDate[date];
+  const setValue = useCallback((next: EnergyValue) => { void update((snapshot) => ({ tasks: snapshot.tasks, energyByDate: { ...snapshot.energyByDate, [date]: next } })).then((saved) => onFeedback?.(saved ? `Energía registrada: ${labels[next - 1]}.` : "No pudimos guardar tu energía.")); }, [date, onFeedback, update]);
   const move = (index: number, delta: number) => document.getElementById(`energy-${compact ? "mobile" : "rail"}-${(index + delta + 5) % 5}`)?.focus();
-  return <div aria-label={compact ? "Nivel de energía de hoy" : "Nivel de energía"} className="grid grid-cols-5 gap-1.5" role="radiogroup">{labels.map((label, index) => { const selected = value === index + 1; return <button aria-checked={selected} className="grid justify-items-center gap-1 text-[.68rem] leading-tight" id={`energy-${compact ? "mobile" : "rail"}-${index}`} key={label} onClick={() => setValue(index + 1)} onKeyDown={(event) => { if (["ArrowRight", "ArrowDown"].includes(event.key)) { event.preventDefault(); move(index, 1); } if (["ArrowLeft", "ArrowUp"].includes(event.key)) { event.preventDefault(); move(index, -1); } }} role="radio" tabIndex={selected || (!value && index === 0) ? 0 : -1}><span className={`grid size-7 place-items-center rounded-full border ${selected ? "border-gold bg-gold text-sumi shadow-[0_0_0_3px_rgba(247,243,238,.9)]" : "border-current"}`}>{index + 1}</span><small>{label}</small></button>; })}</div>;
+  return <div aria-label={compact ? "Nivel de energía de hoy" : "Nivel de energía"} className="grid grid-cols-5 gap-1.5" role="radiogroup">{labels.map((label, index) => { const next = (index + 1) as EnergyValue; return <EnergyOption id={`energy-${compact ? "mobile" : "rail"}-${index}`} index={index} key={label} label={label} onMove={move} onSelect={setValue} selected={value === next} tabIndex={value === next || (!value && index === 0) ? 0 : -1} />; })}</div>;
 }

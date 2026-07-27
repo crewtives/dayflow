@@ -1,3 +1,18 @@
-const days = ["MAR", "MIÉ", "JUE", "VIE", "SÁB", "DOM", "HOY"];
-const energy = [2, 3, 4, 3, 5, 2, undefined];
-export function WeekSummary() { return <section aria-labelledby="week-title" className="p-6 md:p-14"><header className="mb-9"><p className="font-label text-xs tracking-[.14em] text-vermilion-deep">ÚLTIMOS SIETE DÍAS</p><h1 className="mt-2 max-w-md text-4xl font-normal leading-none tracking-[-.04em] md:text-6xl" id="week-title">La forma de tu semana</h1><p className="mt-4 max-w-2xl text-sumi-soft">Compara energía y tareas terminadas. Sin juicios, solo una señal para planificar mejor.</p></header><div className="grid overflow-x-auto border-l border-t border-paper-mid md:grid-cols-7">{days.map((day, index) => <article className={`grid min-h-80 min-w-28 grid-rows-[auto_1fr_auto] border-b border-r border-paper-mid bg-paper-bright p-4 ${day === "HOY" ? "outline-2 outline-vermilion outline-offset-[-2px]" : ""}`} key={day}><header><strong className="text-sm">{day}</strong><p className="mt-1 text-xs text-sumi-soft">{21 + index} JUL</p></header><div className="mx-3 mt-8 flex items-end border-b border-sumi"><div className="relative w-full bg-vermilion" style={{ height: `${(energy[index] ?? 0) * 20}%` }}>{energy[index] && <i className="absolute -top-2 left-1/2 size-3 -translate-x-1/2 rounded-full border-2 border-paper-bright bg-gold" />}</div></div><footer className="mt-4 text-xs text-sumi-soft">{energy[index] ? `Energía ${energy[index]}/5` : "Sin energía"}<span className="mt-2 block">{index + 1}/{index + 3} hechas</span></footer></article>)}</div></section>; }
+"use client";
+
+import { rollingWeekSummary, type CalendarDate } from "@/domain/dayflow";
+import { selectEnergyByDate, selectTasks } from "@/store/dayflow-selectors";
+import { useDayflowStore } from "@/store/dayflow-provider";
+import { WeekDayCard } from "./week-summary/week-day-card";
+import { WeekSummaryHeader } from "./week-summary/week-summary-header";
+
+function label(date: CalendarDate) { return new Intl.DateTimeFormat("es-ES", { weekday: "short" }).format(new Date(`${date}T12:00:00`)).replace(".", "").toUpperCase(); }
+function dateLabel(date: CalendarDate) { return new Intl.DateTimeFormat("es-ES", { day: "numeric", month: "short" }).format(new Date(`${date}T12:00:00`)).toUpperCase(); }
+function today(): CalendarDate { const value = new Date(); return new Date(value.getTime() - value.getTimezoneOffset() * 60_000).toISOString().slice(0, 10); }
+export function WeekSummary() {
+  const tasks = useDayflowStore(selectTasks);
+  const energyByDate = useDayflowStore(selectEnergyByDate);
+  const anchor = today();
+  const days = rollingWeekSummary(anchor, tasks, energyByDate);
+  return <section aria-labelledby="week-title" className="p-6 md:p-14"><WeekSummaryHeader /><div className="grid overflow-x-auto border-l border-t border-paper-mid md:grid-cols-7">{days.map((day) => <WeekDayCard dateLabel={dateLabel} day={day} isToday={day.date === anchor} key={day.date} label={label} />)}</div></section>;
+}

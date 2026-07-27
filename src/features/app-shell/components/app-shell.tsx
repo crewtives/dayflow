@@ -1,15 +1,45 @@
 "use client";
 
-import { useState } from "react";
-import type { ReactNode } from "react";
-import Link from "next/link";
-import { AgendaTimeline } from "@/features/agenda";
-import { EnergyScale } from "@/features/energy";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { DayNavigation } from "@/features/navigation";
-import { TaskDrawer, TaskRail } from "@/features/tasks";
-import { Button, LiveRegion } from "@/shared/ui";
+import { TaskDrawer } from "@/features/tasks";
+import { datePresentation, useSelectedDate } from "@/features/today";
+import { LiveRegion } from "@/shared/ui";
+import type { Task } from "@/domain/dayflow";
+import { useDayflowHydration } from "@/store/use-dayflow-hydration";
+
+import { AppHeader } from "./app-shell/app-header";
+import { AppSidebar } from "./app-shell/app-sidebar";
+import { HydrationErrorState } from "./app-shell/hydration-error-state";
+import { MobileNewTaskButton } from "./app-shell/mobile-new-task-button";
+import { TodayContent } from "./app-shell/today-content";
 
 export function AppShell({ children, page }: { children?: ReactNode; page: "today" | "week" }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  return <div className="min-h-screen md:grid md:grid-cols-[244px_minmax(0,1fr)]"><a className="fixed left-3 top-3 z-[60] -translate-y-40 bg-sumi px-3 py-2 text-paper focus:translate-y-0" href="#main-content">Saltar al contenido</a><aside aria-label="Navegación y estado del día" className="hidden min-h-screen flex-col border-r border-sumi/30 bg-vermilion p-6 text-paper md:fixed md:inset-y-0 md:left-0 md:flex md:w-[244px]"><div className="flex items-center gap-3 text-xs font-bold tracking-[.18em]"><span aria-hidden="true" className="grid size-8 place-items-center border border-current">×</span>DAYFLOW</div><DayNavigation /><section aria-labelledby="energy-title" className="mt-7 border-t border-paper/40 pt-5"><div className="flex items-center justify-between gap-2"><h2 className="font-label text-xs tracking-[.14em]" id="energy-title">ENERGÍA DEL DÍA</h2><span className="text-xs">Sin registrar</span></div><p className="my-4 text-sm">¿Cómo estuvo tu energía?</p><EnergyScale /></section><p className="mt-auto border-t border-paper/30 pt-5 text-xs text-paper/80">Datos locales de demostración</p></aside><div className="min-w-0 md:col-start-2"><header className="sticky top-0 z-20 grid min-h-24 grid-cols-[1fr_auto] items-center gap-4 border-b border-paper-mid bg-paper/95 px-5 py-4 backdrop-blur md:grid-cols-[1fr_auto_1fr] md:px-7"><div><h2 className="font-label text-xs tracking-[.14em] text-vermilion-deep">JORNADA</h2><h1 className="mt-1 text-3xl font-normal leading-none tracking-tight">{page === "today" ? "Hoy" : "Semana"}</h1></div>{page === "today" && <div className="hidden border border-paper-mid sm:flex"><Button aria-label="Día anterior" tone="quiet">←</Button><Button tone="quiet">Hoy</Button><Button aria-label="Día siguiente" tone="quiet">→</Button></div>}<div className="justify-self-end">{page === "today" ? <Button onClick={() => setDrawerOpen(true)}><span aria-hidden="true">＋</span> Nueva tarea</Button> : <Link className="border border-vermilion-deep px-4 py-3 text-sm text-vermilion-deep" href="/today">Volver a hoy</Link>}</div></header><main id="main-content" tabIndex={-1}>{page === "today" ? <><section className="border-b border-paper-mid p-5 md:hidden"><h2 className="sr-only">Energía del día</h2><EnergyScale compact /></section><div className="grid min-h-[calc(100vh-96px)] md:grid-cols-[minmax(0,1.55fr)_minmax(330px,.9fr)]"><AgendaTimeline /><TaskRail /></div></> : children}</main></div>{page === "today" && <button aria-label="Nueva tarea" className="fixed bottom-4 right-4 z-40 grid size-14 place-items-center rounded-full bg-vermilion text-2xl text-paper shadow-fold md:hidden" onClick={() => setDrawerOpen(true)}>＋</button>}<DayNavigation mobile /><TaskDrawer onClose={() => setDrawerOpen(false)} open={drawerOpen} /><LiveRegion message={drawerOpen ? "Formulario de nuevo evento abierto" : ""} /></div>;
+  const [editingTask, setEditingTask] = useState<Task | undefined>();
+  const [returnFocusTo, setReturnFocusTo] = useState<HTMLElement | null>(null);
+  const [restoreFocus, setRestoreFocus] = useState(false);
+  const [feedback, setFeedback] = useState("");
+  const returnFocusRef = useRef<HTMLElement | null>(null);
+  const feedbackTimerRef = useRef<number | null>(null);
+  const { selectedDate, today, previousDay, nextDay, goToToday } = useSelectedDate();
+  const selectedDay = datePresentation(selectedDate, today);
+  const { status } = useDayflowHydration();
+  useEffect(() => { if (restoreFocus) returnFocusRef.current?.focus(); }, [restoreFocus]);
+  useEffect(() => () => { if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current); }, []);
+  const announce = useCallback((message: string) => {
+    if (feedbackTimerRef.current) window.clearTimeout(feedbackTimerRef.current);
+    setFeedback(message);
+    feedbackTimerRef.current = window.setTimeout(() => setFeedback(""), 3600);
+  }, []);
+  const openNew = useCallback((trigger: HTMLElement) => { returnFocusRef.current = trigger; setReturnFocusTo(trigger); setEditingTask(undefined); setDrawerOpen(true); }, []);
+  const openEdit = useCallback((task: Task, trigger: HTMLElement) => { returnFocusRef.current = trigger; setReturnFocusTo(trigger); setEditingTask(task); setDrawerOpen(true); }, []);
+  const closeDrawer = useCallback(() => {
+    returnFocusRef.current?.focus();
+    setDrawerOpen(false);
+    setEditingTask(undefined);
+    setRestoreFocus(true);
+  }, []);
+  if (status === "error" || status === "conflict") return <HydrationErrorState />;
+  return <div className="min-h-screen md:grid md:grid-cols-[244px_minmax(0,1fr)]"><a className="fixed left-3 top-3 z-[60] -translate-y-40 bg-sumi px-3 py-2 text-paper focus:translate-y-0" href="#main-content">Saltar al contenido</a><AppSidebar onFeedback={announce} selectedDate={selectedDate} /><div className="min-w-0 md:col-start-2"><AppHeader onGoToToday={goToToday} onNewTask={openNew} onNextDay={nextDay} onPreviousDay={previousDay} page={page} pageTitle={selectedDay.pageTitle} /><main id="main-content" tabIndex={-1}>{page === "today" ? <TodayContent agendaKicker={selectedDay.agendaKicker} agendaTitle={selectedDay.agendaTitle} date={selectedDate} onEdit={openEdit} onFeedback={announce} /> : children}</main></div>{page === "today" && <MobileNewTaskButton onNewTask={openNew} />}<DayNavigation mobile />{page === "today" && <TaskDrawer date={selectedDate} key={editingTask?.id ?? selectedDate} onClose={closeDrawer} onFeedback={announce} open={drawerOpen} returnFocusTo={returnFocusTo} task={editingTask} />}<LiveRegion message={feedback} /></div>;
 }
